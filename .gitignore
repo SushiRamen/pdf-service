@@ -1,1 +1,4 @@
 .venv
+/app/uploads
+*.pyc
+/app/signed
