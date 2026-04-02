@@ -1,32 +1,34 @@
 import os
 import json
 import asyncio
-import aiofiles
 import datetime
-from typing import List, Optional
-from fastapi import UploadFile
+from typing import Any, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+
 from db.models import Document, DocumentStatus
 from core.config import settings
 from services.pdf_service import PDFService
+from services.template_service import TemplateService
 
 
 class DocumentService:
+
     @staticmethod
-    async def create_document(
+    async def create_from_template(
         db: AsyncSession,
-        file: UploadFile,
+        template_name: str,
+        template_parameters: dict[str, Any],
         signer_email: Optional[str] = None,
-        completion_emails: Optional[List[str]] = None,
+        completion_emails: Optional[list[str]] = None,
         expires_in_days: int = 7,
     ) -> Document:
-        os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-
-        # Create DB record first to get the UUID (used in filename)
+        """Create a document record by filling a stored PDF template."""
+        # Create the DB record first to obtain a UUID
         doc = Document(
-            # Placeholder — will be updated below once file is saved
-            original_pdf_path="",
+            original_pdf_path="",  # filled in below
+            template_name=template_name,
             signer_email=signer_email,
             completion_emails=json.dumps(completion_emails or []),
             expires_at=datetime.datetime.utcnow() + datetime.timedelta(days=expires_in_days),
@@ -35,15 +37,17 @@ class DocumentService:
         await db.commit()
         await db.refresh(doc)
 
-        # Save PDF to disk using the UUID as filename prefix
-        safe_filename = os.path.basename(file.filename or "document.pdf")
-        file_path = os.path.join(settings.UPLOAD_DIR, f"{doc.id}_{safe_filename}")
-        async with aiofiles.open(file_path, "wb") as out_file:
-            content = await file.read()
-            await out_file.write(content)
+        # Generate the filled PDF and detect signature field positions
+        output_filename = f"{doc.id}_{template_name}.pdf"
+        pdf_path, signature_fields = await TemplateService.generate_pdf(
+            template_name=template_name,
+            template_parameters=template_parameters,
+            output_dir=settings.UPLOAD_DIR,
+            output_filename=output_filename,
+        )
 
-        # Update record with final file path
-        doc.original_pdf_path = file_path
+        doc.original_pdf_path = pdf_path
+        doc.signature_fields = json.dumps(signature_fields)
         await db.commit()
         await db.refresh(doc)
         return doc
@@ -56,15 +60,18 @@ class DocumentService:
     @staticmethod
     async def sign_document(db: AsyncSession, doc: Document, signature_data: str) -> Document:
         os.makedirs(settings.SIGNED_DIR, exist_ok=True)
-        output_filename = f"signed_{doc.id}.pdf"
-        output_path = os.path.join(settings.SIGNED_DIR, output_filename)
+        output_path = os.path.join(settings.SIGNED_DIR, f"signed_{doc.id}.pdf")
 
-        # Run blocking PyMuPDF op in a thread to avoid blocking the event loop
+        # Load stored signature field positions (where Signature.Here was in the template)
+        signature_fields = json.loads(doc.signature_fields or "[]")
+
+        # PyMuPDF is blocking — run in a thread
         await asyncio.to_thread(
             PDFService.overlay_signature,
             doc.original_pdf_path,
             output_path,
             signature_data,
+            signature_fields if signature_fields else None,
         )
 
         doc.signed_pdf_path = output_path

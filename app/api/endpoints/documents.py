@@ -1,4 +1,5 @@
 import datetime
+import json
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,15 +31,19 @@ async def get_document_metadata(request: Request, token: str, db: AsyncSession =
     _check_document_accessible(doc)
 
     pdf_url = f"{settings.BASE_URL}/api/v1/document/{token}/pdf"
+    sig_fields = json.loads(doc.signature_fields or "[]")
 
     return DocumentMetadataResponse(
         id=doc.id,
         status=doc.status,
+        template_name=doc.template_name,
         signer_email=doc.signer_email,
         expires_at=doc.expires_at,
         created_at=doc.created_at,
         pdf_url=pdf_url,
+        signature_fields=sig_fields,
     )
+
 
 
 @router.get("/document/{token}/pdf")

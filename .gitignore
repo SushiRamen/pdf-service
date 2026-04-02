@@ -2,3 +2,4 @@
 /app/uploads
 *.pyc
 /app/signed
+/uploads

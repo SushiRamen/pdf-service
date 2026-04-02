@@ -1,60 +1,63 @@
-import json
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.security import get_api_key
-from db.database import get_db
-from db.schemas import DocumentCreateResponse
-from services.document_service import DocumentService
-from core.config import settings
 from core.limiter import limiter
-from typing import Optional
+from core.config import settings
+from db.database import get_db
+from db.schemas import DocumentCreateRequest, DocumentCreateResponse
+from services.document_service import DocumentService
+from services.template_service import TemplateNotFoundError
 
 router = APIRouter()
 
 
-@router.post("/documents/create", response_model=DocumentCreateResponse, dependencies=[Depends(get_api_key)])
+@router.post(
+    "/documents/create",
+    response_model=DocumentCreateResponse,
+    dependencies=[Depends(get_api_key)],
+    summary="Create a document signing session from a stored template",
+)
 @limiter.limit("10/minute")
 async def create_document(
     request: Request,
-    file: UploadFile = File(..., description="PDF file to be signed"),
-    signer_email: Optional[str] = Form(None, description="Email address of the signer"),
-    completion_emails: Optional[str] = Form(
-        None,
-        description='JSON array string of emails to receive the signed PDF. e.g. ["a@b.com","c@d.com"]',
-    ),
+    body: DocumentCreateRequest,
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Create a new document signing session.
+    **Auth:** X-API-Key header required.
 
-    Send as multipart/form-data:
-    - file: the PDF (binary)
-    - signer_email: recipient who signs
-    - completion_emails: JSON array string of addresses to receive the signed copy
+    **Body (JSON):**
+    ```json
+    {
+      "template_name": "wa_storage_lease",
+      "template_parameters": {
+        "facility": { "Name": "Larroc Storage", "Phone": "(555) 123-4567" },
+        "tenant":   { "Name": "John Smith", "Email": "john@example.com",
+                      "CellPhone": "(555) 987-6543", "Address1": "456 Oak Ave",
+                      "City": "Bellevue", "State": "WA", "PostalCode": "98004" },
+        "space":    { "ID": "B7", "Rent": "$175.00" }
+      },
+      "signer_email": "john@example.com",
+      "completion_emails": ["owner@larrocstorage.com"]
+    }
+    ```
+
+    Keys not provided fall back to template defaults defined in `{template_name}.defaults.json`.
+    Returns a `signing_url` the client opens in their browser.
     """
-    if not (file.filename or "").lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
-
-    # Parse completion_emails from JSON string
-    emails_list: list[str] = []
-    if completion_emails:
-        try:
-            parsed = json.loads(completion_emails)
-            if not isinstance(parsed, list):
-                raise ValueError("Must be a JSON array")
-            emails_list = [str(e) for e in parsed]
-        except (json.JSONDecodeError, ValueError):
-            raise HTTPException(
-                status_code=400,
-                detail='completion_emails must be a valid JSON array string, e.g. ["a@b.com"]',
-            )
-
-    doc = await DocumentService.create_document(
-        db,
-        file,
-        signer_email=signer_email,
-        completion_emails=emails_list,
-    )
+    try:
+        doc = await DocumentService.create_from_template(
+            db=db,
+            template_name=body.template_name,
+            template_parameters=body.template_parameters,
+            signer_email=body.signer_email,
+            completion_emails=body.completion_emails or [],
+        )
+    except TemplateNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {exc}")
 
     signing_url = f"{settings.BASE_URL}/sign/{doc.id}"
     return DocumentCreateResponse(
@@ -63,3 +66,15 @@ async def create_document(
         expires_at=doc.expires_at,
         status=doc.status,
     )
+
+
+@router.get(
+    "/templates",
+    summary="List available PDF templates",
+    dependencies=[Depends(get_api_key)],
+)
+@limiter.limit("30/minute")
+async def list_templates(request: Request):
+    """Returns names of all templates available in resources/pdf_templates/."""
+    from services.template_service import TemplateService
+    return {"templates": TemplateService.list_templates()}

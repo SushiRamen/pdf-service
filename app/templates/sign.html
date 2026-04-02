@@ -17,7 +17,6 @@
             overflow: hidden;
         }
 
-        /* ── Top Bar ── */
         header {
             display: flex;
             align-items: center;
@@ -28,217 +27,134 @@
             border-bottom: 1px solid #2a2f3d;
             flex-shrink: 0;
         }
-        header .brand { font-weight: 700; font-size: 1rem; color: #7c8ef7; letter-spacing: 0.5px; }
-        header .status-badge {
-            font-size: 0.75rem;
-            padding: 3px 10px;
-            border-radius: 999px;
-            background: #1e3a5f;
-            color: #60a5fa;
-            border: 1px solid #2563eb44;
+        header .brand { font-weight: 700; font-size: 1rem; color: #7c8ef7; }
+        .status-badge {
+            font-size: 0.75rem; padding: 3px 10px; border-radius: 999px;
+            background: #1e3a5f; color: #60a5fa; border: 1px solid #2563eb44;
         }
 
-        /* ── Main Layout ── */
-        main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        main { display: flex; flex: 1; overflow: hidden; }
 
-        /* ── PDF Panel ── */
+        /* PDF Panel */
         #pdf-panel {
-            flex: 1;
-            overflow-y: auto;
-            background: #24272f;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1.5rem 1rem;
-            gap: 1rem;
-            position: relative;
+            flex: 1; overflow-y: auto; background: #24272f;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 1.5rem 1rem; gap: 1rem;
         }
-
         #pdf-loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 4rem;
-            color: #6b7280;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 1rem; margin-top: 4rem; color: #6b7280;
         }
         .spinner {
-            width: 36px; height: 36px;
-            border: 3px solid #2a2f3d;
-            border-top-color: #7c8ef7;
-            border-radius: 50%;
+            width: 36px; height: 36px; border: 3px solid #2a2f3d;
+            border-top-color: #7c8ef7; border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* PDF page wrapper — position relative so we can overlay Sign Here button */
+        /* Each rendered page */
         .pdf-page-wrapper {
             position: relative;
             box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-            border-radius: 4px;
-            overflow: visible;
+            border-radius: 4px; overflow: visible;
         }
-        .pdf-page-wrapper canvas {
-            display: block;
-            border-radius: 4px;
-        }
+        .pdf-page-wrapper canvas { display: block; border-radius: 4px; }
 
-        /* Sign Here overlay button — shown on last page */
-        #sign-here-btn {
+        /* SIGN HERE overlay buttons — injected by JS at the correct coordinates */
+        .sign-field-btn {
             position: absolute;
-            bottom: 50px;
-            right: 50px;
-            width: 200px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;
+            cursor: pointer; border-radius: 4px;
             border: 2px dashed #f59e0b;
-            background: rgba(251, 191, 36, 0.08);
+            background: rgba(251, 191, 36, 0.1);
             color: #fbbf24;
             transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-            user-select: none;
+            user-select: none; overflow: hidden;
         }
-        #sign-here-btn:hover:not(.disabled-btn) {
-            background: rgba(251, 191, 36, 0.16);
+        .sign-field-btn:hover:not(.disabled-field):not(.applied-field) {
+            background: rgba(251, 191, 36, 0.2);
             box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
         }
-        #sign-here-btn.disabled-btn {
-            cursor: not-allowed;
-            opacity: 0.4;
+        .sign-field-btn.disabled-field {
+            cursor: not-allowed; opacity: 0.45;
         }
-        #sign-here-btn.applied {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
+        .sign-field-btn.applied-field {
+            border-color: #10b981; background: rgba(16, 185, 129, 0.08);
+            color: #10b981; cursor: default;
         }
-        /* Thumbnail preview of signature inside the box */
-        #sign-here-btn img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            border-radius: 3px;
+        .sign-field-btn img {
+            width: 100%; height: 100%; object-fit: contain;
         }
 
-        /* ── Side Panel ── */
+        /* Side Panel */
         #side-panel {
-            width: 320px;
-            min-width: 280px;
-            background: #12151b;
-            border-left: 1px solid #2a2f3d;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            gap: 1.25rem;
-            overflow-y: auto;
-            flex-shrink: 0;
+            width: 300px; min-width: 260px;
+            background: #12151b; border-left: 1px solid #2a2f3d;
+            display: flex; flex-direction: column;
+            padding: 1.25rem; gap: 1.1rem;
+            overflow-y: auto; flex-shrink: 0;
         }
-
         .panel-section h2 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #6b7280;
-            margin-bottom: 0.75rem;
+            font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 1px; color: #6b7280; margin-bottom: 0.65rem;
         }
+        .divider { height: 1px; background: #2a2f3d; }
 
         /* Signature canvas */
         .sig-canvas-wrap {
-            position: relative;
-            background: #fff;
-            border-radius: 8px;
-            border: 2px dashed #3b4051;
-            overflow: hidden;
-            aspect-ratio: 4 / 1;
+            position: relative; background: #fff; border-radius: 8px;
+            border: 2px dashed #3b4051; overflow: hidden; aspect-ratio: 4 / 1;
         }
-        .sig-canvas-wrap canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
-        }
+        .sig-canvas-wrap canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
         .sig-placeholder {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #aaa;
-            font-size: 0.85rem;
-            pointer-events: none;
-            transition: opacity 0.2s;
+            position: absolute; inset: 0; display: flex;
+            align-items: center; justify-content: center;
+            color: #aaa; font-size: 0.85rem;
+            pointer-events: none; transition: opacity 0.2s;
         }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 0.6rem 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            border: none;
-            cursor: pointer;
-            transition: filter 0.15s, opacity 0.15s;
-            text-decoration: none;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 0.6rem 1rem; border-radius: 6px;
+            font-weight: 600; font-size: 0.875rem; border: none;
+            cursor: pointer; transition: filter 0.15s, opacity 0.15s;
         }
         .btn:hover:not(:disabled) { filter: brightness(1.1); }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
         .btn-ghost { background: #1e2330; color: #9ca3af; border: 1px solid #2a2f3d; }
-        .btn-primary { background: #4f46e5; color: #fff; width: 100%; padding: 0.75rem; font-size: 0.95rem; }
         .btn-success { background: #059669; color: #fff; width: 100%; padding: 0.75rem; font-size: 0.95rem; }
 
-        /* Steps checklist */
-        .steps { display: flex; flex-direction: column; gap: 0.6rem; }
+        /* Steps */
+        .steps { display: flex; flex-direction: column; gap: 0.55rem; }
         .step {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            font-size: 0.85rem;
-            color: #6b7280;
+            display: flex; align-items: center; gap: 0.55rem;
+            font-size: 0.82rem; color: #6b7280;
         }
         .step .dot {
-            width: 20px; height: 20px;
-            border-radius: 50%;
+            width: 20px; height: 20px; border-radius: 50%;
             border: 2px solid #3b4051;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.65rem;
-            flex-shrink: 0;
+            font-size: 0.65rem; flex-shrink: 0;
             transition: background 0.2s, border-color 0.2s;
         }
         .step.done .dot { background: #059669; border-color: #059669; color: #fff; }
         .step.done { color: #34d399; }
 
-        #status-msg {
-            font-size: 0.8rem;
-            color: #ef4444;
-            min-height: 1.2em;
-            text-align: center;
+        .field-counter {
+            font-size: 0.8rem; color: #9ca3af;
+            text-align: center; padding: 4px 0;
         }
+        .field-counter span { color: #7c8ef7; font-weight: 700; }
 
-        /* Loading overlay for submit */
+        #status-msg { font-size: 0.78rem; color: #ef4444; min-height: 1.1em; text-align: center; }
+
+        /* Submit overlay */
         #submit-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 1rem;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); z-index: 100;
+            align-items: center; justify-content: center;
+            flex-direction: column; gap: 1rem;
         }
         #submit-overlay.visible { display: flex; }
         #submit-overlay p { color: #fff; font-size: 1rem; }
@@ -252,19 +168,14 @@
 </header>
 
 <main>
-    <!-- PDF Viewer Panel -->
     <div id="pdf-panel">
         <div id="pdf-loading">
             <div class="spinner"></div>
             <p>Loading document…</p>
         </div>
-        <!-- Pages injected here by JS -->
     </div>
 
-    <!-- Side Controls Panel -->
     <div id="side-panel">
-
-        <!-- Steps -->
         <div class="panel-section">
             <h2>Steps</h2>
             <div class="steps">
@@ -274,14 +185,13 @@
                 </div>
                 <div class="step" id="step-place">
                     <div class="dot">2</div>
-                    <span>Click "SIGN HERE" on the document</span>
+                    <span>Click all "SIGN HERE" fields</span>
                 </div>
             </div>
         </div>
 
-        <div style="height:1px;background:#2a2f3d;"></div>
+        <div class="divider"></div>
 
-        <!-- Signature Pad -->
         <div class="panel-section">
             <h2>Your Signature</h2>
             <div class="sig-canvas-wrap" id="sig-wrap">
@@ -293,261 +203,278 @@
             </div>
         </div>
 
-        <div style="height:1px;background:#2a2f3d;"></div>
+        <div class="divider"></div>
 
-        <!-- Complete Button -->
         <div class="panel-section">
+            <div class="field-counter" id="field-counter" style="display:none;">
+                <span id="fields-signed">0</span> / <span id="fields-total">0</span> fields signed
+            </div>
             <p id="status-msg"></p>
             <button class="btn btn-success" id="complete-btn" disabled>Complete Signing</button>
         </div>
-
     </div>
 </main>
 
-<!-- Submit Loading Overlay -->
 <div id="submit-overlay">
     <div class="spinner" style="width:48px;height:48px;border-width:4px;"></div>
     <p>Applying signature and saving document…</p>
 </div>
 
-<!-- pdf.js from CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-    const DOC_ID = "{{ doc_id }}";
-    const PDF_URL = `/api/v1/document/${DOC_ID}/pdf`;
+const DOC_ID = "{{ doc_id }}";
+const PDF_SCALE = 1.5;
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-    // ── State ──
-    let signatureDataURL = null;  // set once user draws something
-    let signaturePlaced = false;  // set once user clicks SIGN HERE
+// ── State ──
+let signatureDataURL = null;
+let signatureFields  = [];   // [{page, x0, y0, x1, y1}, ...]  from API
+let fieldElements    = [];   // [{fieldObj, el, signed: bool}]
 
-    // ── DOM refs ──
-    const pdfPanel     = document.getElementById("pdf-panel");
-    const pdfLoading   = document.getElementById("pdf-loading");
-    const sigCanvas    = document.getElementById("sig-canvas");
-    const sigWrap      = document.getElementById("sig-wrap");
-    const placeholder  = document.getElementById("sig-placeholder");
-    const clearBtn     = document.getElementById("clear-btn");
-    const completeBtn  = document.getElementById("complete-btn");
-    const statusMsg    = document.getElementById("status-msg");
-    const step1        = document.getElementById("step-draw");
-    const step2        = document.getElementById("step-place");
-    const headerStatus = document.getElementById("header-status");
+const pdfPanel    = document.getElementById("pdf-panel");
+const pdfLoading  = document.getElementById("pdf-loading");
+const sigCanvas   = document.getElementById("sig-canvas");
+const sigWrap     = document.getElementById("sig-wrap");
+const placeholder = document.getElementById("sig-placeholder");
+const clearBtn    = document.getElementById("clear-btn");
+const completeBtn = document.getElementById("complete-btn");
+const statusMsg   = document.getElementById("status-msg");
+const step1       = document.getElementById("step-draw");
+const step2       = document.getElementById("step-place");
+const counter     = document.getElementById("field-counter");
+const fieldsSigned = document.getElementById("fields-signed");
+const fieldsTotal  = document.getElementById("fields-total");
 
-    // ── Helpers ──
-    function updateState() {
-        const hasSig = !!signatureDataURL;
+// ── UI state update ──
+function updateState() {
+    const hasSig    = !!signatureDataURL;
+    const total     = fieldElements.length;
+    const signed    = fieldElements.filter(f => f.signed).length;
+    const allSigned = total > 0 && signed === total;
 
-        // Step indicators
-        step1.classList.toggle("done", hasSig);
-        step2.classList.toggle("done", signaturePlaced);
+    step1.classList.toggle("done", hasSig);
+    step2.classList.toggle("done", allSigned);
 
-        // Sign Here button state
-        const signHereBtn = document.getElementById("sign-here-btn");
-        if (signHereBtn) {
-            if (!hasSig) {
-                signHereBtn.classList.add("disabled-btn");
-                signHereBtn.title = "Draw your signature first";
-            } else {
-                signHereBtn.classList.remove("disabled-btn");
-                signHereBtn.title = "Click to place your signature here";
-            }
-            if (signaturePlaced) {
-                signHereBtn.classList.add("applied");
-                signHereBtn.innerHTML = `<img src="${signatureDataURL}" alt="Signature Preview" />`;
-            }
-        }
-
-        // Complete button
-        if (hasSig && signaturePlaced) {
-            completeBtn.disabled = false;
-            statusMsg.textContent = "";
-        } else if (!hasSig) {
-            completeBtn.disabled = true;
-            statusMsg.textContent = "Please draw your signature above.";
-        } else {
-            completeBtn.disabled = true;
-            statusMsg.textContent = 'Click the "SIGN HERE" box on the document.';
-        }
+    // Field counter badge
+    if (total > 0) {
+        counter.style.display = "block";
+        fieldsSigned.textContent = signed;
+        fieldsTotal.textContent  = total;
     }
 
-    // ── Signature Canvas ──
-    const ctx = sigCanvas.getContext("2d");
-    let drawing = false;
-
-    function resizeSigCanvas() {
-        const w = sigWrap.clientWidth;
-        const h = sigWrap.clientHeight;
-        // Preserve existing drawing
-        const tmp = document.createElement("canvas");
-        tmp.width = sigCanvas.width;
-        tmp.height = sigCanvas.height;
-        tmp.getContext("2d").drawImage(sigCanvas, 0, 0);
-
-        sigCanvas.width = w;
-        sigCanvas.height = h;
-        ctx.strokeStyle = "#1a1a2e";
-        ctx.lineWidth = 2.5;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-
-        // Re-draw preserved content (scaled)
-        if (tmp.width > 0 && tmp.height > 0) {
-            ctx.drawImage(tmp, 0, 0, w, h);
-        }
-    }
-
-    function getPos(e) {
-        const r = sigCanvas.getBoundingClientRect();
-        const src = e.touches ? e.touches[0] : e;
-        return { x: src.clientX - r.left, y: src.clientY - r.top };
-    }
-
-    function canvasIsBlank() {
-        const px = ctx.getImageData(0, 0, sigCanvas.width, sigCanvas.height).data;
-        for (let i = 3; i < px.length; i += 4) if (px[i] > 10) return false;
-        return true;
-    }
-
-    sigCanvas.addEventListener("mousedown", e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); });
-    sigCanvas.addEventListener("mouseup",   () => { drawing = false; ctx.beginPath(); onStrokeEnd(); });
-    sigCanvas.addEventListener("mouseleave",() => { drawing = false; ctx.beginPath(); });
-    sigCanvas.addEventListener("mousemove", e => {
-        if (!drawing) return;
-        const p = getPos(e);
-        ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+    // Enable/disable each SIGN HERE button
+    fieldElements.forEach(f => {
+        if (f.signed) return;
+        f.el.classList.toggle("disabled-field", !hasSig);
     });
-    sigCanvas.addEventListener("touchstart", e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, { passive: false });
-    sigCanvas.addEventListener("touchend",   () => { drawing = false; ctx.beginPath(); onStrokeEnd(); });
-    sigCanvas.addEventListener("touchmove",  e => {
-        if (!drawing) return; e.preventDefault();
-        const p = getPos(e);
-        ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
-    }, { passive: false });
 
-    function onStrokeEnd() {
-        if (canvasIsBlank()) {
-            signatureDataURL = null;
-            placeholder.style.opacity = "1";
-        } else {
-            signatureDataURL = sigCanvas.toDataURL("image/png");
-            placeholder.style.opacity = "0";
-        }
-        updateState();
+    // Complete button
+    if (hasSig && allSigned) {
+        completeBtn.disabled = false;
+        statusMsg.textContent = "";
+    } else if (!hasSig) {
+        completeBtn.disabled = true;
+        statusMsg.textContent = "Draw your signature first.";
+    } else {
+        completeBtn.disabled = true;
+        const rem = total - signed;
+        statusMsg.textContent = `Click ${rem} remaining "SIGN HERE" field${rem !== 1 ? "s" : ""} on the document.`;
     }
+}
 
-    clearBtn.addEventListener("click", () => {
-        ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+// ── Mark a field as signed ──
+function applyFieldSignature(fieldState) {
+    if (fieldState.signed || !signatureDataURL) return;
+    fieldState.signed = true;
+    const el = fieldState.el;
+    el.classList.remove("disabled-field");
+    el.classList.add("applied-field");
+    el.innerHTML = `<img src="${signatureDataURL}" alt="Signature" />`;
+    updateState();
+}
+
+// ── Signature Canvas ──
+const ctx = sigCanvas.getContext("2d");
+let drawing = false;
+
+function resizeSigCanvas() {
+    const w = sigWrap.clientWidth;
+    const h = sigWrap.clientHeight;
+    const tmp = document.createElement("canvas");
+    tmp.width = sigCanvas.width; tmp.height = sigCanvas.height;
+    tmp.getContext("2d").drawImage(sigCanvas, 0, 0);
+    sigCanvas.width = w; sigCanvas.height = h;
+    ctx.strokeStyle = "#1a1a2e"; ctx.lineWidth = 2.5;
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    if (tmp.width > 0 && tmp.height > 0) ctx.drawImage(tmp, 0, 0, w, h);
+}
+
+function getPos(e) {
+    const r = sigCanvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+}
+
+function canvasIsBlank() {
+    const d = ctx.getImageData(0, 0, sigCanvas.width, sigCanvas.height).data;
+    for (let i = 3; i < d.length; i += 4) if (d[i] > 10) return false;
+    return true;
+}
+
+function onStrokeEnd() {
+    if (canvasIsBlank()) {
         signatureDataURL = null;
-        signaturePlaced = false;
         placeholder.style.opacity = "1";
-
-        // Reset sign-here button
-        const btn = document.getElementById("sign-here-btn");
-        if (btn) {
-            btn.classList.remove("applied");
-            btn.innerHTML = `✎ SIGN HERE`;
-        }
-        updateState();
-    });
-
-    // ── pdf.js Rendering ──
-    let lastPageWrapper = null; // reference to last page DOM wrapper
-
-    async function loadPDF() {
-        try {
-            const pdf = await pdfjsLib.getDocument(PDF_URL).promise;
-            pdfLoading.remove();
-
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                const page = await pdf.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 1.5 });
-
-                const wrapper = document.createElement("div");
-                wrapper.className = "pdf-page-wrapper";
-                wrapper.style.width = viewport.width + "px";
-
-                const canvas = document.createElement("canvas");
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                const renderCtx = canvas.getContext("2d");
-                await page.render({ canvasContext: renderCtx, viewport }).promise;
-
-                wrapper.appendChild(canvas);
-                pdfPanel.appendChild(wrapper);
-
-                if (pageNum === pdf.numPages) {
-                    lastPageWrapper = wrapper;
-                    injectSignHereButton(wrapper, viewport);
-                }
-            }
-        } catch (err) {
-            pdfLoading.innerHTML = `<p style="color:#ef4444;">Failed to load PDF. ${err.message}</p>`;
-        }
+    } else {
+        signatureDataURL = sigCanvas.toDataURL("image/png");
+        placeholder.style.opacity = "0";
     }
+    updateState();
+}
 
-    function injectSignHereButton(wrapper, viewport) {
+sigCanvas.addEventListener("mousedown", e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); });
+sigCanvas.addEventListener("mouseup",   () => { drawing = false; ctx.beginPath(); onStrokeEnd(); });
+sigCanvas.addEventListener("mouseleave",() => { if (drawing) { drawing = false; ctx.beginPath(); onStrokeEnd(); } });
+sigCanvas.addEventListener("mousemove", e => {
+    if (!drawing) return;
+    const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+});
+sigCanvas.addEventListener("touchstart", e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, { passive: false });
+sigCanvas.addEventListener("touchend",   () => { drawing = false; ctx.beginPath(); onStrokeEnd(); });
+sigCanvas.addEventListener("touchmove",  e => {
+    if (!drawing) return; e.preventDefault();
+    const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+}, { passive: false });
+
+clearBtn.addEventListener("click", () => {
+    ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+    signatureDataURL = null;
+    placeholder.style.opacity = "1";
+    // Reset all signed fields
+    fieldElements.forEach(f => {
+        if (!f.signed) return;
+        f.signed = false;
+        f.el.classList.remove("applied-field");
+        f.el.innerHTML = "✎ SIGN HERE";
+        f.el.classList.add("disabled-field");
+    });
+    updateState();
+});
+
+// ── Inject SIGN HERE buttons for a rendered page ──
+function injectFieldButtons(pageWrapper, pageIndex) {
+    const pageFields = signatureFields.filter(f => f.page === pageIndex);
+    pageFields.forEach((field, i) => {
         const btn = document.createElement("div");
-        btn.id = "sign-here-btn";
-        btn.className = "disabled-btn";
+        btn.className = "sign-field-btn disabled-field";
         btn.innerHTML = "✎ SIGN HERE";
         btn.title = "Draw your signature first";
 
-        // Scale sign-here box to match pdf.js viewport scale (1.5)
-        const scale = 1.5;
-        btn.style.width  = Math.round(200 * scale) + "px";
-        btn.style.height = Math.round(60  * scale) + "px";
-        btn.style.right  = Math.round(50  * scale) + "px";
-        btn.style.bottom = Math.round(50  * scale) + "px";
+        // Scale PDF point coords to screen pixels
+        btn.style.left   = (field.x0 * PDF_SCALE) + "px";
+        btn.style.top    = (field.y0 * PDF_SCALE) + "px";
+        btn.style.width  = ((field.x1 - field.x0) * PDF_SCALE) + "px";
+        btn.style.height = ((field.y1 - field.y0) * PDF_SCALE) + "px";
 
-        btn.addEventListener("click", () => {
-            if (!signatureDataURL) return; // disabled state
-            signaturePlaced = true;
-            updateState();
+        const fieldState = { field, el: btn, signed: false };
+        btn.addEventListener("click", () => applyFieldSignature(fieldState));
+        fieldElements.push(fieldState);
+        pageWrapper.appendChild(btn);
+    });
+}
+
+// ── pdf.js rendering ──
+async function loadPDF(pdfUrl) {
+    try {
+        const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+        pdfLoading.remove();
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page     = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: PDF_SCALE });
+
+            const wrapper = document.createElement("div");
+            wrapper.className = "pdf-page-wrapper";
+            wrapper.style.width  = viewport.width  + "px";
+            wrapper.style.height = viewport.height + "px";
+
+            const canvas = document.createElement("canvas");
+            canvas.width  = viewport.width;
+            canvas.height = viewport.height;
+            await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+
+            wrapper.appendChild(canvas);
+            pdfPanel.appendChild(wrapper);
+
+            // Inject SIGN HERE buttons for this page (0-indexed)
+            injectFieldButtons(wrapper, pageNum - 1);
+        }
+
+        // After all pages rendered, sync state
+        updateState();
+    } catch (err) {
+        pdfLoading.innerHTML = `<p style="color:#ef4444;">Failed to load PDF: ${err.message}</p>`;
+    }
+}
+
+// ── Complete / Submit ──
+completeBtn.addEventListener("click", async () => {
+    if (!signatureDataURL || fieldElements.some(f => !f.signed)) return;
+
+    document.getElementById("submit-overlay").classList.add("visible");
+    completeBtn.disabled = true;
+
+    try {
+        const res = await fetch(`/sign/${DOC_ID}/submit`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ signature_data: signatureDataURL }),
         });
 
-        wrapper.appendChild(btn);
-    }
-
-    // ── Complete / Submit ──
-    completeBtn.addEventListener("click", async () => {
-        if (!signatureDataURL || !signaturePlaced) return;
-
-        document.getElementById("submit-overlay").classList.add("visible");
-        completeBtn.disabled = true;
-
-        try {
-            const res = await fetch(`/sign/${DOC_ID}/submit`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ signature_data: signatureDataURL }),
-            });
-
-            if (res.ok) {
-                window.location.reload(); // GET → success.html
-            } else {
-                const err = await res.json().catch(() => ({}));
-                statusMsg.textContent = err.detail || "Submission failed. Please try again.";
-                document.getElementById("submit-overlay").classList.remove("visible");
-                completeBtn.disabled = false;
-            }
-        } catch (e) {
-            statusMsg.textContent = "Network error. Please try again.";
+        if (res.ok) {
+            window.location.reload();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            statusMsg.textContent = err.detail || "Submission failed. Please try again.";
             document.getElementById("submit-overlay").classList.remove("visible");
             completeBtn.disabled = false;
         }
-    });
+    } catch {
+        statusMsg.textContent = "Network error. Please try again.";
+        document.getElementById("submit-overlay").classList.remove("visible");
+        completeBtn.disabled = false;
+    }
+});
 
-    // ── Init ──
-    window.addEventListener("load", () => {
-        resizeSigCanvas();
-        updateState();
-        loadPDF();
-    });
-    window.addEventListener("resize", resizeSigCanvas);
+// ── Init ──
+window.addEventListener("load", async () => {
+    resizeSigCanvas();
+
+    // 1. Fetch document metadata (includes signature_fields + pdf_url)
+    try {
+        const meta = await fetch(`/api/v1/document/${DOC_ID}`).then(r => r.json());
+        signatureFields = meta.signature_fields || [];
+
+        // If no Signature.Here in template, fall back: one field at bottom of last page
+        // (handled by the backend overlay_signature fallback — nothing to show on frontend)
+
+        if (signatureFields.length === 0) {
+            // Show a single generic sign-here notice — no positioned overlay needed
+            // The backend will use the bottom-right fallback
+            statusMsg.textContent = "";
+        }
+
+        // 2. Render the PDF
+        await loadPDF(meta.pdf_url);
+    } catch (err) {
+        pdfLoading.innerHTML = `<p style="color:#ef4444;">Failed to load document metadata: ${err.message}</p>`;
+    }
+
+    updateState();
+});
+window.addEventListener("resize", resizeSigCanvas);
 </script>
 </body>
 </html>
