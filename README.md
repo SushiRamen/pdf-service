@@ -390,6 +390,7 @@ Visit:
    SIGNED_DIR=/data/signed
    DATABASE_URL=sqlite+aiosqlite:////data/data.db
    BASE_URL=https://your-app.onrender.com
+   PYTHON_VERSION=3.11.8
    ```
 5. Set `API_KEY` to a strong random value.
 
