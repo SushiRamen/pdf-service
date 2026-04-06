@@ -420,3 +420,25 @@ Visit:
 - [ ] Mobile-responsive layout for the signing page
 - [ ] Typed signature option alongside the drawn canvas
 - [ ] Page progress indicator showing document scroll status
+
+---
+
+## Debug Tools
+
+### `pdf_debugger.py`
+
+A standalone script to help debug exactly where text and rects are placed on a PDF page using `PyMuPDF`.
+
+It comes in two flavors:
+
+**1. Image Extraction**
+Given a PDF path, a 0-indexed page number, and a string formatted as `Rect(...)`, it will extract the exact bounding box and save it as a PNG (with optional zoom).
+```bash
+python3 pdf_debugger.py path/to/pdf.pdf 4 "Rect(335.7, 615.9, 516.2, 648.2)" -o cropped_box.png -z 3.0
+```
+
+**2. Text Finding**
+Pass the `--find-text` flag to treat the third argument as literal text instead of a `Rect`. It will output the exact tight bounding `Rect` instances for all matches found on that page.
+```bash
+python3 pdf_debugger.py path/to/pdf.pdf 4 "Signature.Here" --find-text
+```
