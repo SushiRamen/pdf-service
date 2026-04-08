@@ -1,5 +1,6 @@
 import fitz  # PyMuPDF
 import base64
+import datetime
 
 SIGNATURE_FIELD_NAME = "Signature.Here"
 
@@ -52,11 +53,17 @@ class PDFService:
             for widget in page.widgets():
                 name = widget.field_name
                 if name == SIGNATURE_FIELD_NAME:
-                    # Leave blank; mark read-only so it doesn't appear as an
-                    # interactive field in the browser viewer.
-                    widget.field_flags = fitz.PDF_FIELD_IS_READ_ONLY
-                    widget.text_align  = fitz.TEXT_ALIGN_CENTER
-                    widget.update()
+                    # Delete the widget entirely so it doesn't render on top of
+                    # the signature image that overlay_signature() will insert
+                    # later. Widgets (annotations) sit above the content stream
+                    # and their opaque background would otherwise hide the image.
+                    page.delete_widget(widget)
+                    # Paint over the literal "Signature.Here" text that exists
+                    # independently in the content stream. Using draw_rect instead
+                    # of add_redact_annot/apply_redactions to avoid the redaction
+                    # API rewriting the content stream and shifting surrounding text.
+                    for text_rect in page.search_for(SIGNATURE_FIELD_NAME):
+                        page.draw_rect(text_rect, color=(1, 1, 1), fill=(1, 1, 1))
                     continue
 
                 if name in data:
@@ -88,16 +95,31 @@ class PDFService:
 
         doc = fitz.open(input_pdf_path)
 
+        timestamp = datetime.datetime.now().strftime("Signed %b %d, %Y %I:%M %p")
+
         if signature_fields:
             for field in signature_fields:
                 page = doc[field["page"]]
                 rect = fitz.Rect(field["x0"], field["y0"], field["x1"], field["y1"])
                 page.insert_image(rect, stream=image_bytes)
+                # Insert tiny timestamp in the bottom-right of the signature rect
+                ts_rect = fitz.Rect(rect.x0, rect.y1 - 10, rect.x1, rect.y1)
+                page.insert_textbox(
+                    ts_rect, timestamp,
+                    fontsize=5, color=(0.4, 0.4, 0.4),
+                    align=fitz.TEXT_ALIGN_RIGHT,
+                )
         else:
             last = doc[-1]
             pw, ph = last.rect.width, last.rect.height
             rect = fitz.Rect(pw - 250, ph - 70, pw - 50, ph - 20)
             last.insert_image(rect, stream=image_bytes)
+            ts_rect = fitz.Rect(rect.x0, rect.y1 - 10, rect.x1, rect.y1)
+            last.insert_textbox(
+                ts_rect, timestamp,
+                fontsize=5, color=(0.4, 0.4, 0.4),
+                align=fitz.TEXT_ALIGN_RIGHT,
+            )
 
         doc.save(output_pdf_path)
         doc.close()
